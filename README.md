@@ -14,8 +14,7 @@ jobs:
     name: Test
     runs-on: ubuntu-latest
     steps:
-    - name: "Let's go"
-      uses: actions-rindeal/setup-bash-fun@master
+    - uses: actions-rindeal/setup-bash-fun@master
     - run: |
       source ~/fun.sh
       # ...
