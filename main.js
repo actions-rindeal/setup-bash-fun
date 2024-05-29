@@ -96,17 +96,17 @@ class Core {
    * Checks if the runner is in debug mode.
    * @returns {boolean} Whether the runner is in debug mode.
    */
-  static isDebug => return process.env['RUNNER_DEBUG'] === '1'
+  static isDebug = () => return process.env['RUNNER_DEBUG'] === '1'
   /**
    * Issues a debug command.
    * @param {string} message - The debug message.
    */
-  static debug(message) { this.#issueCommand('debug', {}, message) }
+  static debug = message => this.#issueCommand('debug', {}, message)
   /**
    * Writes info to log with console.log.
    * @param {string} message - info message
    */
-  static info(message) { process.stdout.write(message + os.EOL) }
+  static info = message => process.stdout.write(message + os.EOL)
   /**
    * Adds a notice issue.
    * @param {string | Error} message - notice issue message. Errors will be converted to string via toString()
@@ -129,12 +129,12 @@ class Core {
    * Sets the action status to failed.
    * @param {string | Error} message - add error issue message
    */
-  static setFailed(message) { process.exitCode = 1 ; this.error(message) }
+  static setFailed = message => process.exitCode = 1 ; this.error(message)
   /**
    * Begins an output group.
    * @param {string} name - The name of the output group
    */
-  static startGroup(name) { this.#issueCommand('group', {}, name) }
+  static startGroup = name => this.#issueCommand('group', {}, name)
   /**
    * Wrap an asynchronous function call in a group.
    * @param {string} name - The name of the group
@@ -145,48 +145,48 @@ class Core {
   /**
    * Ends an output group.
    */
-  static endGroup() { this.#issueCommand('endgroup', {}) }
+  static endGroup = () => this.#issueCommand('endgroup', {})
   /**
    * Enables or disables the echoing of commands into stdout for the rest of the step.
    * @param {boolean} enabled
    */
-  static setCommandEcho(enabled) { this.#issueCommand('echo', {}, enabled ? 'on' : 'off') }
+  static setCommandEcho = enabled => this.#issueCommand('echo', {}, enabled ? 'on' : 'off')
   /**
    * Gets the value of a state set by this action's main execution.
    * @param {string} name - name of the state to get
    * @returns {string}
    */
-  static getState(name) { return process.env[`STATE_${name}`] || '' }
+  static getState = name => return process.env[`STATE_${name}`] || ''
   /**
    * Saves state for current action, the state can only be retrieved by this action's post job execution.
    * @param {string} name - name of the state to store
    * @param {any} value - value to store. Non-string values will be converted to a string via JSON.stringify
    */
-  static saveState(name, value) { this.#issueFileCommand('STATE', this.#prepareKeyValueMessage(name, value)) }
+  static saveState = (name, value) => this.#issueFileCommand('STATE', this.#prepareKeyValueMessage(name, value))
   /**
    * Sets the name of the output to set.
    * @param {string} name - name of the output to set
    * @param {any} value - value to store. Non-string values will be converted to a string via JSON.stringify
    */
-  static setOutput(name, value) { this.#issueFileCommand('OUTPUT', this.#prepareKeyValueMessage(name, value)) }
+  static setOutput = (name, value) => this.#issueFileCommand('OUTPUT', this.#prepareKeyValueMessage(name, value))
   /**
    * Converts the given path to the posix form.
    * @param {string} pth - Path to transform.
    * @returns {string} - Posix path.
    */
-  static toPosixPath(pth) { return pth.replace(/[\\]/g, '/') }
+  static toPosixPath = pth => return pth.replace(/[\\]/g, '/')
   /**
    * Converts the given path to the win32 form.
    * @param {string} pth - Path to transform.
    * @returns {string} - Win32 path.
    */
-  static toWin32Path(pth) { return pth.replace(/[/]/g, '\\') }
+  static toWin32Path = pth => return pth.replace(/[/]/g, '\\')
   /**
    * Converts the given path to a platform-specific path.
    * @param {string} pth - The path to platformize.
    * @returns {string} - The platform-specific path.
    */
-  static toPlatformPath(pth) { return pth.replace(/[/\\]/g, path.sep) }
+  static toPlatformPath = pth => return pth.replace(/[/\\]/g, path.sep)
   /**
    * Generates a version 4 UUID, a randomly generated UUID, as per RFC 4122.
    * @returns {string} A random UUID string.
