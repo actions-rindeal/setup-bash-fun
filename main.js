@@ -121,14 +121,14 @@ class core {
    * @param {string} name - The name of the output group
    */
   static startGroup(name) {
-    this.#issue('group', name)
+    this.#issueCommand('group', {}, name)
   }
 
   /**
    * Ends an output group.
    */
   static endGroup() {
-    this.#issue('endgroup')
+    this.#issueCommand('endgroup', {})
   }
 
   /**
@@ -153,9 +153,9 @@ class core {
    * @param {boolean} enabled
    */
   static setCommandEcho(enabled) {
-    this.#issue('echo', enabled ? 'on' : 'off')
+    this.#issueCommand('echo', {}, enabled ? 'on' : 'off')
   }
-
+  
   /**
    * Gets the value of a state set by this action's main execution.
    * @param {string} name - name of the state to get
