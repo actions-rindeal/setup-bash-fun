@@ -11,10 +11,21 @@ on:
 
 jobs:
   test:
+
+    defaults:
+      run:
+        # -o verbose -o xtrace
+        shell: bash --noprofile --norc -o errexit -o pipefail -o nounset {0}
+  
     name: Test
     runs-on: ubuntu-latest
     steps:
     
     - name: "Let's go"
       uses: actions-rindeal/setup-bash-fun@master
+    - name: "Check"
+      run: |
+        test -f ~/fun.sh
+        ls -la ~/fun.sh
+        ls -la ~/
     
