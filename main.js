@@ -273,8 +273,20 @@ class core {
   }
 
   static #prepareKeyValueMessage(key, value) {
-    const delimiter = `ghadelimiter_${uuidv4()}`
+    const delimiter = `ghadelimiter_${this.uuidv4()}`
     return `${key}<<${delimiter}${os.EOL}${this.#toCommandValue(value)}${os.EOL}${delimiter}`
+  }
+
+  /**
+   * Generates a version 4 UUID, a randomly generated UUID, as per RFC 4122.
+   * @returns {string} A random UUID string.
+   */
+  static uuidv4() {
+    import 'crypto'
+    const bytes = crypto.randomBytes(16)
+    bytes[6] = (bytes[6] & 0x0f) | 0x40
+    bytes[8] = (bytes[8] & 0x3f) | 0x80
+    return `${(bytes[0] | bytes[1] << 8 | bytes[2] << 16 | bytes[3] << 24).toString(16)}-${(bytes[4] | bytes[5] << 8).toString(16)}-${(bytes[6] | bytes[7] << 8).toString(16)}-${(bytes[8] | bytes[9] << 8).toString(16)}-${(bytes[10] | bytes[11] << 8 | bytes[12] << 16 | bytes[13] << 24 | bytes[14] << 32 | bytes[15] << 40).toString(16)}`
   }
 }
 
