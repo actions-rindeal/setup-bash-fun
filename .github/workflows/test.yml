@@ -15,7 +15,6 @@ jobs:
     defaults:
       run:
         # -o verbose -o xtrace
-        # pwsh -command ". '{0}'"
         shell: bash --noprofile --norc  -o errexit -o pipefail -o nounset  -o verbose -o xtrace  -c "source ~/fun.sh; source '{0}'"
   
     name: Test
