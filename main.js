@@ -282,7 +282,7 @@ class core {
 function run() {
   try {
     let ref = core.getInput('ref') || SRC_REF_DEFAULT
-    let dest = getInput('dest') || DEST_DEFAULT
+    let dest = core.getInput('dest') || DEST_DEFAULT
 
     // Validate and set default values for inputs
     if (!/^[a-zA-Z0-9_.-]*$/.test(ref)) {
