@@ -25,22 +25,7 @@ const DEST_DEFAULT = `~/${SRC_BASH_FUN_PATH}`
  * @property {?number} startColumn - The start column for the annotation. Cannot be sent when `startLine` and `endLine` are different values.
  * @property {?number} endColumn - The end column for the annotation. Cannot be sent when `startLine` and `endLine` are different values. Defaults to `startColumn` when `startColumn` is provided.
  */
-class AnnotationProperties {
-  /**
-   * @constructor
-   * @param {Object} props - The properties of the annotation.
-   */
-  constructor(props) {
-    if (!Object.keys(props).length)
-      return
-    this.title = props.title
-    this.file = props.file
-    this.startLine = props.startLine
-    this.endLine = props.endLine
-    this.startColumn = props.startColumn
-    this.endColumn = props.endColumn
-  }
-}
+class AnnotationProperties { constructor({ title, file, startLine, endLine, startColumn, endColumn } = {}) { Object.assign(this, { title, file, startLine, endLine, startColumn, endColumn }) } }
 /**
  * @class Core
  * @description This class provides utility methods for handling environment variables, issuing commands, logging, and managing output groups. It is designed to be used in a Node.js environment.
@@ -154,11 +139,6 @@ class Core {
   static #issueCommand(cmd, props, msg) { process.stdout.write(`::${cmd} ${Object.entries(props).map(([k, v]) => `${k}=${this.#escapeProperty(v)}`).join(',')}\n${this.#escapeData(msg)}` + os.EOL) }
   static #escapeData(s) { return s.replace(/%/g, '%25').replace(/\r/g, '%0D').replace(/\n/g, '%0A') }
   static #escapeProperty(s) { return s.replace(/%/g, '%25').replace(/\r/g, '%0D').replace(/\n/g, '%0A').replace(/:/g, '%3A').replace(/,/g, '%2C') }
-  /**
-   * Sanitizes an input into a string so it can be passed into issueCommand safely.
-   * @param {any} input - input to sanitize into a string
-   * @returns {string}
-   */
   static #toCommandValue(input) { return input == null ? '' : (typeof input === 'string' || input instanceof String) ? input : JSON.stringify(input) }
   /**
    * Sets the name of the output to set.
@@ -172,25 +152,12 @@ class Core {
    * @param {any} value - value to store. Non-string values will be converted to a string via JSON.stringify
    */
   static saveState(name, value) { this.#issueFileCommand('STATE', this.#prepareKeyValueMessage(name, value)) }
-  /**
-   * Issues a command to a file.
-   * @param {string} command - The command to issue.
-   * @param {string} message - The message of the command.
-   * @private
-   */
   static #issueFileCommand(command, message) {
     const filePath = process.env[`GITHUB_${command}`]
     if (!filePath) { throw new Error(`Unable to find environment variable for file command ${command}`) }
     if (!fs.existsSync(filePath)) { throw new Error(`Missing file at path: ${filePath}`) }
     fs.appendFileSync(filePath, `${this.#toCommandValue(message)}${os.EOL}`, { encoding: 'utf8' })
   }
-  /**
-   * Prepares a key-value message for a command.
-   * @param {string} key - The key of the message.
-   * @param {any} value - The value of the message.
-   * @returns {string} The prepared key-value message.
-   * @private
-   */
   static #prepareKeyValueMessage(key, value) {
     const delimiter = `ghadelimiter_${this.uuidv4()}`
     return `${key}<<${delimiter}${os.EOL}${this.#toCommandValue(value)}${os.EOL}${delimiter}`
