@@ -13,7 +13,7 @@ const SRC_BASH_FUN_PATH = 'fun.sh'
 const DEST_DEFAULT = `~/${SRC_BASH_FUN_PATH}`
 
 
-// Define the functions from actions/core here
+//region /////////////////////  Lightweight portable `@actions/core` class  /////////////////////////////////////////
 
 /**
  * @class
@@ -42,6 +42,15 @@ class AnnotationProperties {
   }
 }
 
+/**
+ * @class Core
+ * @description This class provides utility methods for handling environment variables, issuing commands, logging, and managing output groups. It is designed to be used in a Node.js environment.
+ * @requires process - A global object used for accessing environment variables, writing to stdout, and setting the exit code of the script.
+ * @requires os - Provides operating system-related utility methods and properties.
+ * @requires path - Provides utilities for working with file and directory paths.
+ * @requires fs - Provides an API for interacting with the file system.
+ * @requires crypto - Provides cryptographic functionality.
+ */
 class Core {
   /**
    * Gets the input value of the given name from the environment variables.
@@ -140,13 +149,11 @@ class Core {
    */
   static async group(name, fn) {
     this.startGroup(name)
-    let result
     try {
-      result = await fn()
+      return await fn()
     } finally {
       this.endGroup()
     }
-    return result
   }
 
   /**
@@ -262,6 +269,12 @@ class Core {
     this.#issueFileCommand('STATE', this.#prepareKeyValueMessage(name, value))
   }
 
+  /**
+   * Issues a command to a file.
+   * @param {string} command - The command to issue.
+   * @param {string} message - The message of the command.
+   * @private
+   */
   static #issueFileCommand(command, message) {
     const filePath = process.env[`GITHUB_${command}`]
     if (!filePath) {
@@ -273,6 +286,13 @@ class Core {
     fs.appendFileSync(filePath, `${this.#toCommandValue(message)}${os.EOL}`, { encoding: 'utf8' })
   }
 
+  /**
+   * Prepares a key-value message for a command.
+   * @param {string} key - The key of the message.
+   * @param {any} value - The value of the message.
+   * @returns {string} The prepared key-value message.
+   * @private
+   */
   static #prepareKeyValueMessage(key, value) {
     const delimiter = `ghadelimiter_${this.uuidv4()}`
     return `${key}<<${delimiter}${os.EOL}${this.#toCommandValue(value)}${os.EOL}${delimiter}`
@@ -286,9 +306,17 @@ class Core {
     const bytes = crypto.randomBytes(16)
     bytes[6] = (bytes[6] & 0x0f) | 0x40
     bytes[8] = (bytes[8] & 0x3f) | 0x80
-    return `${(bytes[0] | bytes[1] << 8 | bytes[2] << 16 | bytes[3] << 24).toString(16)}-${(bytes[4] | bytes[5] << 8).toString(16)}-${(bytes[6] | bytes[7] << 8).toString(16)}-${(bytes[8] | bytes[9] << 8).toString(16)}-${(bytes[10] | bytes[11] << 8 | bytes[12] << 16 | bytes[13] << 24 | bytes[14] << 32 | bytes[15] << 40).toString(16)}`
+    const p1 = (bytes[0] | bytes[1] << 8 | bytes[2] << 16 | bytes[3] << 24).toString(16)
+    const p2 = (bytes[4] | bytes[5] << 8).toString(16)
+    const p3 = (bytes[6] | bytes[7] << 8).toString(16)
+    const p4 = (bytes[8] | bytes[9] << 8).toString(16)
+    const p5 = (bytes[10] | bytes[11] << 8 | bytes[12] << 16 | bytes[13] << 24 | bytes[14] << 32 | bytes[15] << 40).toString(16)
+    return `${p1}-${p2}-${p3}-${p4}-${p5}`
   }
 }
+
+//endregion /////////////////////  Lightweight portable `@actions/core` class  /////////////////////////////////////////
+
 
 const core = Core
 
