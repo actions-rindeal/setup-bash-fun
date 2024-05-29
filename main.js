@@ -271,6 +271,11 @@ class core {
     }
     fs.appendFileSync(filePath, `${this.#toCommandValue(message)}${os.EOL}`, { encoding: 'utf8' })
   }
+
+  static #prepareKeyValueMessage(key, value) {
+    const delimiter = `ghadelimiter_${uuidv4()}`
+    return `${key}<<${delimiter}${os.EOL}${this.#toCommandValue(value)}${os.EOL}${delimiter}`
+  }
 }
 
 
