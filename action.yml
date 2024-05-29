@@ -1,1 +1,12 @@
-
+name: 'Setup Fun BASH'
+description: 'Sets up a BASH helper function library'
+inputs:
+  ref:
+    description: 'Tag, branch, SHA of the fun.sh to use. Default is "master".'
+    required: false
+  dest:
+    description: 'The destination path for fun.sh. Default is "~/fun.sh".'
+    required: false
+runs:
+  using: 'node20'
+  main: 'main.js'
