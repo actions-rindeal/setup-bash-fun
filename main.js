@@ -6,10 +6,10 @@ const path = require('path')
 
 
 // Global constants
-const REPO_NAME = 'actions-rindeal/setup-bash-fun'
-const DEFAULT_REF = 'master'
+const SRC_REPO_NAME = 'actions-rindeal/setup-bash-fun'
+const SRC_REF_DEFAULT = 'master'
 const SRC_BASH_FUN_PATH = 'fun.sh'
-const DEFAULT_DEST = `~/${SRC_BASH_FUN_PATH}`
+const DEST_DEFAULT = `~/${SRC_BASH_FUN_PATH}`
 
 
 // Define the functions from actions/core here
@@ -47,8 +47,8 @@ function escapeProperty(s) {
 
 function run() {
   try {
-    let ref = getInput('ref') || DEFAULT_REF
-    let dest = getInput('dest') || DEFAULT_DEST
+    let ref = getInput('ref') || SRC_REF_DEFAULT
+    let dest = getInput('dest') || DEST_DEFAULT
 
     // Validate and set default values for inputs
     if (!/^[a-zA-Z0-9_.-]*$/.test(ref)) {
@@ -56,7 +56,7 @@ function run() {
       return
     }
 
-    const downloadUrl = `https://raw.githubusercontent.com/${REPO_NAME}/${ref}/${FILE_NAME}`
+    const downloadUrl = `https://raw.githubusercontent.com/${SRC_REPO_NAME}/${ref}/${SRC_BASH_FUN_PATH}`
 
     dest = path.resolve(dest.startsWith('~') ? os.homedir() + dest.slice(1) : dest)
 
