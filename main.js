@@ -43,8 +43,7 @@ class AnnotationProperties {
 
 class core {
   /**
-   * @method
-   * @description This method gets the input value of the given name from the environment variables.
+   * Gets the input value of the given name from the environment variables.
    * @param {string} name - The name of the input to get.
    * @param {boolean} required - Whether the input is required.
    * @returns {string} The input value.
@@ -58,8 +57,7 @@ class core {
   }
 
   /**
-   * @method
-   * @description This method checks if the runner is in debug mode.
+   * Checks if the runner is in debug mode.
    * @returns {boolean} Whether the runner is in debug mode.
    */
   static isDebug() {
@@ -67,8 +65,7 @@ class core {
   }
 
   /**
-   * @method
-   * @description This method issues a debug command.
+   * Issues a debug command.
    * @param {string} message - The debug message.
    */
   static debug(message) {
@@ -77,18 +74,126 @@ class core {
 
   /**
    * Sets the action status to failed.
-   * When the action exits it will be with an exit code of 1
    * @param {string | Error} message - add error issue message
    */
   static setFailed(message) {
-    process.exitCode = 1;
-    this.error(message);
+    process.exitCode = 1
+    this.error(message)
   }
 
+  /**
+   * Adds an error issue.
+   * @param {string | Error} message - error issue message. Errors will be converted to string via toString()
+   * @param {AnnotationProperties} properties - optional properties to add to the annotation.
+   */
+  static error(message, properties = {}) {
+    this.#issueCommand('error', new AnnotationProperties(properties), message instanceof Error ? message.toString() : message)
+  }
 
   /**
-   * @method
-   * @description This method issues a command.
+   * Adds a warning issue.
+   * @param {string | Error} message - warning issue message. Errors will be converted to string via toString()
+   * @param {AnnotationProperties} properties - optional properties to add to the annotation.
+   */
+  static warning(message, properties = {}) {
+    this.#issueCommand('warning', new AnnotationProperties(properties), message instanceof Error ? message.toString() : message)
+  }
+
+  /**
+   * Adds a notice issue.
+   * @param {string | Error} message - notice issue message. Errors will be converted to string via toString()
+   * @param {AnnotationProperties} properties - optional properties to add to the annotation.
+   */
+  static notice(message, properties = {}) {
+    this.#issueCommand('notice', new AnnotationProperties(properties), message instanceof Error ? message.toString() : message)
+  }
+
+  /**
+   * Writes info to log with console.log.
+   * @param {string} message - info message
+   */
+  static info(message) {
+    process.stdout.write(message + os.EOL)
+  }
+
+  /**
+   * Begins an output group.
+   * @param {string} name - The name of the output group
+   */
+  static startGroup(name) {
+    this.#issue('group', name)
+  }
+
+  /**
+   * Ends an output group.
+   */
+  static endGroup() {
+    this.#issue('endgroup')
+  }
+
+  /**
+   * Wrap an asynchronous function call in a group.
+   * @param {string} name - The name of the group
+   * @param {() => Promise<T>} fn - The function to wrap in the group
+   * @returns {Promise<T>}
+   */
+  static async group(name, fn) {
+    this.startGroup(name)
+    let result
+    try {
+      result = await fn()
+    } finally {
+      this.endGroup()
+    }
+    return result
+  }
+
+  /**
+   * Enables or disables the echoing of commands into stdout for the rest of the step.
+   * @param {boolean} enabled
+   */
+  static setCommandEcho(enabled) {
+    this.#issue('echo', enabled ? 'on' : 'off')
+  }
+
+  /**
+   * Gets the value of a state set by this action's main execution.
+   * @param {string} name - name of the state to get
+   * @returns {string}
+   */
+  static getState(name) {
+    return process.env[`STATE_${name}`] || ''
+  }
+
+  /**
+   * Converts the given path to the posix form.
+   * @param {string} pth - Path to transform.
+   * @returns {string} - Posix path.
+   */
+  static toPosixPath(pth) {
+    return pth.replace(/[\\]/g, '/')
+  }
+
+  /**
+   * Converts the given path to the win32 form.
+   * @param {string} pth - Path to transform.
+   * @returns {string} - Win32 path.
+   */
+  static toWin32Path(pth) {
+    return pth.replace(/[/]/g, '\\')
+  }
+
+  /**
+   * Converts the given path to a platform-specific path.
+   * @param {string} pth - The path to platformize.
+   * @returns {string} - The platform-specific path.
+   */
+  static toPlatformPath(pth) {
+    return pth.replace(/[/\\]/g, path.sep)
+  }
+
+  /**
+   * Issues a command.
    * @param {string} command - The command to issue.
    * @param {Object} properties - The properties of the command.
    * @param {string} message - The message of the command.
@@ -99,8 +204,7 @@ class core {
   }
 
   /**
-   * @method
-   * @description This method escapes data for a command.
+   * Escapes data for a command.
    * @param {string} s - The data to escape.
    * @returns {string} The escaped data.
    */
@@ -109,8 +213,7 @@ class core {
   }
 
   /**
-   * @method
-   * @description This method escapes a property for a command.
+   * Escapes a property for a command.
    * @param {string} s - The property to escape.
    * @returns {string} The escaped property.
    */
@@ -118,195 +221,22 @@ class core {
     return s.replace(/%/g, '%25').replace(/\r/g, '%0D').replace(/\n/g, '%0A').replace(/:/g, '%3A').replace(/,/g, '%2C')
   }
 
-
-
-  ///////////////////////////////////////////////
-
-  
   /**
-   * Gets whether Actions Step Debug is on or not
-   * @returns {boolean}
-   */
-  static isDebug() {
-    return process.env['RUNNER_DEBUG'] === '1';
-  }
-
-  /**
-   * Writes debug message to user log
-   * @param {string} message - debug message
-   */
-  static debug(message) {
-    this.#issueCommand('debug', {}, message);
-  }
-
-  /**
-   * Adds an error issue
-   * @param {string | Error} message - error issue message. Errors will be converted to string via toString()
-   * @param {AnnotationProperties} properties - optional properties to add to the annotation.
-   */
-  static error(message, properties = {}) {
-    this.#issueCommand(
-      'error',
-      new AnnotationProperties(properties),
-      message instanceof Error ? message.toString() : message
-    );
-  }
-
-  /**
-   * Adds a warning issue
-   * @param {string | Error} message - warning issue message. Errors will be converted to string via toString()
-   * @param {AnnotationProperties} properties - optional properties to add to the annotation.
-   */
-  static warning(message, properties = {}) {
-    this.#issueCommand(
-      'warning',
-      new AnnotationProperties(properties),
-      message instanceof Error ? message.toString() : message
-    );
-  }
-
-  /**
-   * Adds a notice issue
-   * @param {string | Error} message - notice issue message. Errors will be converted to string via toString()
-   * @param {AnnotationProperties} properties - optional properties to add to the annotation.
-   */
-  static notice(message, properties = {}) {
-    this.#issueCommand(
-      'notice',
-      new AnnotationProperties(properties),
-      message instanceof Error ? message.toString() : message
-    );
-  }
-
-  /**
-   * Writes info to log with console.log.
-   * @param {string} message - info message
-   */
-  static info(message) {
-    process.stdout.write(message + os.EOL);
-  }
-
-  /**
-   * Begin an output group.
-   * Output until the next `groupEnd` will be foldable in this group
-   * @param {string} name - The name of the output group
-   */
-  static startGroup(name) {
-    this.#issue('group', name);
-  }
-
-  /**
-   * End an output group.
-   */
-  static endGroup() {
-    this.#issue('endgroup');
-  }
-
-  /**
-   * Wrap an asynchronous function call in a group.
-   * Returns the same type as the function itself.
-   * @param {string} name - The name of the group
-   * @param {() => Promise<T>} fn - The function to wrap in the group
-   * @returns {Promise<T>}
-   */
-  static async group(name, fn) {
-    this.startGroup(name);
-
-    let result;
-
-    try {
-      result = await fn();
-    } finally {
-      this.endGroup();
-    }
-
-    return result;
-  }
-
-    /**
-   * Enables or disables the echoing of commands into stdout for the rest of the step.
-   * Echoing is disabled by default if ACTIONS_STEP_DEBUG is not set.
-   * @param {boolean} enabled
-   */
-  static setCommandEcho(enabled) {
-    this.#issue('echo', enabled ? 'on' : 'off');
-  }
-
-
-    /**
-   * Gets the value of an state set by this action's main execution.
-   * @param {string} name - name of the state to get
-   * @returns {string}
-   */
-  static getState(name) {
-    return process.env[`STATE_${name}`] || '';
-  }
-
-  static async getIDToken(aud) {
-    return await this.#OidcClient.getIDToken(aud);
-  }
-
-  /**
-   * toPosixPath converts the given path to the posix form. On Windows, \\ will be
-   * replaced with /.
-   * @param {string} pth - Path to transform.
-   * @returns {string} - Posix path.
-   */
-  static toPosixPath(pth) {
-    return pth.replace(/[\\]/g, '/');
-  }
-
-  /**
-   * toWin32Path converts the given path to the win32 form. On Linux, / will be
-   * replaced with \\.
-   * @param {string} pth - Path to transform.
-   * @returns {string} - Win32 path.
-   */
-  static toWin32Path(pth) {
-    return pth.replace(/[/]/g, '\\');
-  }
-
-  /**
-   * toPlatformPath converts the given path to a platform-specific path. It does
-   * this by replacing instances of / and \ with the platform-specific path
-   * separator.
-   * @param {string} pth - The path to platformize.
-   * @returns {string} - The platform-specific path.
-   */
-  static toPlatformPath(pth) {
-    return pth.replace(/[/\\]/g, path.sep);
-  }
-
-  static async getDetails() {
-    return {
-      ...(await (this.#isWindows
-        ? this.#getWindowsInfo()
-        : this.#isMacOS
-        ? this.#getMacOsInfo()
-        : this.#getLinuxInfo())),
-      platform: this.#platform,
-      arch: this.#arch,
-      isWindows: this.#isWindows,
-      isMacOS: this.#isMacOS,
-      isLinux: this.#isLinux,
-    };
-  }
-
-    /**
-   * Sanitizes an input into a string so it can be passed into issueCommand safely
+   * Sanitizes an input into a string so it can be passed into issueCommand safely.
    * @param {any} input - input to sanitize into a string
    * @returns {string}
    */
   static #toCommandValue(input) {
     if (input === null || input === undefined) {
-      return '';
+      return ''
     } else if (typeof input === 'string' || input instanceof String) {
-      return input;
+      return input
     }
-    return JSON.stringify(input);
+    return JSON.stringify(input)
   }
 
-/**
+  /**
+   * Sets the name of the output to set.
    * @param {string} name - name of the output to set
    * @param {any} value - value to store. Non-string values will be converted to a string via JSON.stringify
    */
@@ -331,10 +261,6 @@ class core {
     this.#issueFileCommand('STATE', this.#prepareKeyValueMessage(name, value))
   }
 }
-
-
-
-
 
 
 function run() {
