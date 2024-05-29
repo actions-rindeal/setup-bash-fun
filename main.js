@@ -48,6 +48,15 @@ class Core {
     return val.trim()
   }
   /**
+   * Sets env variable for this action and future actions in the job
+   * @param {string} name - the name of the variable to set
+   * @param {Any} val - the value of the variable. Non-string values will be converted to a string via JSON.stringify
+   */
+  static exportVariable(name, val) {
+    process.env[name] = toCommandValue(val)
+    return issueFileCommand('ENV', prepareKeyValueMessage(name, val))
+  }
+  /**
    * Checks if the runner is in debug mode.
    * @returns {boolean} Whether the runner is in debug mode.
    */
