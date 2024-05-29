@@ -3,6 +3,27 @@ setup-bash-fun!
 
 Sets up a library of helper functions in a specified file to be sourced in your steps later
 
+How to Run
+--------------
+
+### The Easisest Way
+
+```yaml
+jobs:
+  test:
+    defaults:
+      run:
+        # -o verbose -o xtrace
+        shell: bash --noprofile --norc  -o errexit -o pipefail -o nounset  -o verbose -o xtrace  -c "source ~/fun.sh; source '{0}'"
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions-rindeal/setup-bash-fun@master
+    - run: |
+      # now you can already use functions from the BASH Fun library
+```
+
+### Semi-manual Way
 
 ```yaml
 jobs:
@@ -16,13 +37,20 @@ jobs:
     steps:
     - uses: actions-rindeal/setup-bash-fun@master
     - run: |
+      # source on demand only
       source ~/fun.sh
       # ...
 ```
 
+### Manual Way
+
+Download the library yourself:
+
 ```sh
 wget -O ~/fun.sh https://raw.githubusercontent.com/actions-rindeal/setup-bash-fun/master/fun.sh
 ```
+
+And use it however you want
 
 ```yaml
 jobs:
