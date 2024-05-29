@@ -30,6 +30,8 @@ class AnnotationProperties {
    * @param {Object} props - The properties of the annotation.
    */
   constructor(props) {
+    if (!Object.keys(props).length)
+      return
     this.title = props.title
     this.file = props.file
     this.startLine = props.startLine
@@ -74,24 +76,15 @@ class core {
   }
 
   /**
-   * @method
-   * @description This method sets the process exit code to 1 and issues an error command.
-   * @param {string|Error} message - The error message.
+   * Sets the action status to failed.
+   * When the action exits it will be with an exit code of 1
+   * @param {string | Error} message - add error issue message
    */
   static setFailed(message) {
-    process.exitCode = 1
-    this.#issueCommand('error', {}, message instanceof Error ? message.toString() : message)
+    process.exitCode = 1;
+    this.error(message);
   }
 
-  /**
-   * @method
-   * @description This method sets an output for the action.
-   * @param {string} name - The name of the output.
-   * @param {string} value - The value of the output.
-   */
-  static setOutput(name, value) {
-    process.stdout.write(`::set-output name=${name}::${this.#escape(value)}\n`)
-  }
 
   /**
    * @method
@@ -124,7 +117,221 @@ class core {
   static #escapeProperty(s) {
     return s.replace(/%/g, '%25').replace(/\r/g, '%0D').replace(/\n/g, '%0A').replace(/:/g, '%3A').replace(/,/g, '%2C')
   }
+
+
+
+  ///////////////////////////////////////////////
+
+  
+  /**
+   * Gets whether Actions Step Debug is on or not
+   * @returns {boolean}
+   */
+  static isDebug() {
+    return process.env['RUNNER_DEBUG'] === '1';
+  }
+
+  /**
+   * Writes debug message to user log
+   * @param {string} message - debug message
+   */
+  static debug(message) {
+    this.#issueCommand('debug', {}, message);
+  }
+
+  /**
+   * Adds an error issue
+   * @param {string | Error} message - error issue message. Errors will be converted to string via toString()
+   * @param {AnnotationProperties} properties - optional properties to add to the annotation.
+   */
+  static error(message, properties = {}) {
+    this.#issueCommand(
+      'error',
+      new AnnotationProperties(properties),
+      message instanceof Error ? message.toString() : message
+    );
+  }
+
+  /**
+   * Adds a warning issue
+   * @param {string | Error} message - warning issue message. Errors will be converted to string via toString()
+   * @param {AnnotationProperties} properties - optional properties to add to the annotation.
+   */
+  static warning(message, properties = {}) {
+    this.#issueCommand(
+      'warning',
+      new AnnotationProperties(properties),
+      message instanceof Error ? message.toString() : message
+    );
+  }
+
+  /**
+   * Adds a notice issue
+   * @param {string | Error} message - notice issue message. Errors will be converted to string via toString()
+   * @param {AnnotationProperties} properties - optional properties to add to the annotation.
+   */
+  static notice(message, properties = {}) {
+    this.#issueCommand(
+      'notice',
+      new AnnotationProperties(properties),
+      message instanceof Error ? message.toString() : message
+    );
+  }
+
+  /**
+   * Writes info to log with console.log.
+   * @param {string} message - info message
+   */
+  static info(message) {
+    process.stdout.write(message + os.EOL);
+  }
+
+  /**
+   * Begin an output group.
+   * Output until the next `groupEnd` will be foldable in this group
+   * @param {string} name - The name of the output group
+   */
+  static startGroup(name) {
+    this.#issue('group', name);
+  }
+
+  /**
+   * End an output group.
+   */
+  static endGroup() {
+    this.#issue('endgroup');
+  }
+
+  /**
+   * Wrap an asynchronous function call in a group.
+   * Returns the same type as the function itself.
+   * @param {string} name - The name of the group
+   * @param {() => Promise<T>} fn - The function to wrap in the group
+   * @returns {Promise<T>}
+   */
+  static async group(name, fn) {
+    this.startGroup(name);
+
+    let result;
+
+    try {
+      result = await fn();
+    } finally {
+      this.endGroup();
+    }
+
+    return result;
+  }
+
+    /**
+   * Enables or disables the echoing of commands into stdout for the rest of the step.
+   * Echoing is disabled by default if ACTIONS_STEP_DEBUG is not set.
+   * @param {boolean} enabled
+   */
+  static setCommandEcho(enabled) {
+    this.#issue('echo', enabled ? 'on' : 'off');
+  }
+
+
+    /**
+   * Gets the value of an state set by this action's main execution.
+   * @param {string} name - name of the state to get
+   * @returns {string}
+   */
+  static getState(name) {
+    return process.env[`STATE_${name}`] || '';
+  }
+
+  static async getIDToken(aud) {
+    return await this.#OidcClient.getIDToken(aud);
+  }
+
+  /**
+   * toPosixPath converts the given path to the posix form. On Windows, \\ will be
+   * replaced with /.
+   * @param {string} pth - Path to transform.
+   * @returns {string} - Posix path.
+   */
+  static toPosixPath(pth) {
+    return pth.replace(/[\\]/g, '/');
+  }
+
+  /**
+   * toWin32Path converts the given path to the win32 form. On Linux, / will be
+   * replaced with \\.
+   * @param {string} pth - Path to transform.
+   * @returns {string} - Win32 path.
+   */
+  static toWin32Path(pth) {
+    return pth.replace(/[/]/g, '\\');
+  }
+
+  /**
+   * toPlatformPath converts the given path to a platform-specific path. It does
+   * this by replacing instances of / and \ with the platform-specific path
+   * separator.
+   * @param {string} pth - The path to platformize.
+   * @returns {string} - The platform-specific path.
+   */
+  static toPlatformPath(pth) {
+    return pth.replace(/[/\\]/g, path.sep);
+  }
+
+  static async getDetails() {
+    return {
+      ...(await (this.#isWindows
+        ? this.#getWindowsInfo()
+        : this.#isMacOS
+        ? this.#getMacOsInfo()
+        : this.#getLinuxInfo())),
+      platform: this.#platform,
+      arch: this.#arch,
+      isWindows: this.#isWindows,
+      isMacOS: this.#isMacOS,
+      isLinux: this.#isLinux,
+    };
+  }
+
+    /**
+   * Sanitizes an input into a string so it can be passed into issueCommand safely
+   * @param {any} input - input to sanitize into a string
+   * @returns {string}
+   */
+  static #toCommandValue(input) {
+    if (input === null || input === undefined) {
+      return '';
+    } else if (typeof input === 'string' || input instanceof String) {
+      return input;
+    }
+    return JSON.stringify(input);
+  }
+
+/**
+   * @param {string} name - name of the output to set
+   * @param {any} value - value to store. Non-string values will be converted to a string via JSON.stringify
+   */
+  static setOutput(name, value) {
+    const filePath = process.env['GITHUB_OUTPUT']
+    if (!filePath) {
+      throw new Error('File path for setOutput not provided')
+    }
+    this.#issueFileCommand('OUTPUT', this.#prepareKeyValueMessage(name, value))
+  }
+
+  /**
+   * Saves state for current action, the state can only be retrieved by this action's post job execution.
+   * @param {string} name - name of the state to store
+   * @param {any} value - value to store. Non-string values will be converted to a string via JSON.stringify
+   */
+  static saveState(name, value) {
+    const filePath = process.env['GITHUB_STATE']
+    if (!filePath) {
+      throw new Error('File path for saveState not provided')
+    }
+    this.#issueFileCommand('STATE', this.#prepareKeyValueMessage(name, value))
+  }
 }
+
 
 
 
