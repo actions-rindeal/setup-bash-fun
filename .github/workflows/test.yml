@@ -1,0 +1,19 @@
+on:
+  push:
+    branches:
+    - master
+    paths:
+    - 'main.js'
+    - 'action.yml'
+
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+    
+    - name: "Let's go"
+      uses: actions-rindeal/setup-bash-fun@master
+    
