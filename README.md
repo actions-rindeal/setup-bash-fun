@@ -11,8 +11,8 @@ jobs:
       run:
         # -o verbose -o xtrace
         shell: bash --noprofile --norc -o errexit -o pipefail -o nounset {0}
-    name: Test
     runs-on: ubuntu-latest
+
     steps:
     - uses: actions-rindeal/setup-bash-fun@master
     - run: |
