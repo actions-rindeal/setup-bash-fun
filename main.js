@@ -83,6 +83,16 @@ class Core {
     return issueFileCommand('ENV', prepareKeyValueMessage(name, val))
   }
   /**
+   * Masks a secret in logs.
+   * @param {string} secret - The secret to mask.
+   */
+  static setSecret = secret => issueCommand('add-mask', {}, secret)
+  /**
+   * Adds a path to the PATH environment variable.
+   * @param {string} inputPath - The path to add.
+   */
+  static addPath = inputPath => { issueFileCommand('PATH', inputPath) ; process.env.PATH = `${inputPath}${path.delimiter}${process.env.PATH}` }
+  /**
    * Checks if the runner is in debug mode.
    * @returns {boolean} Whether the runner is in debug mode.
    */
