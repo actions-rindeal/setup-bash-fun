@@ -129,7 +129,7 @@ class Core {
    * Sets the action status to failed.
    * @param {string | Error} message - add error issue message
    */
-  static setFailed = message => process.exitCode = 1 ; this.error(message)
+  static setFailed(message) { process.exitCode = 1 ; this.error(message) }
   /**
    * Begins an output group.
    * @param {string} name - The name of the output group
