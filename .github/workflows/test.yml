@@ -23,9 +23,7 @@ jobs:
     
     - name: "Let's go"
       uses: actions-rindeal/setup-bash-fun@master
-    - name: "Check"
-      run: |
-        test -f ~/fun.sh
-        ls -la ~/fun.sh
-        ls -la ~/
+    - run: test -f ~/fun.sh
+    - run: ls -la ~/fun.sh
+    - run: cat ~/fun.sh
     
