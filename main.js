@@ -96,7 +96,7 @@ class Core {
    * Checks if the runner is in debug mode.
    * @returns {boolean} Whether the runner is in debug mode.
    */
-  static isDebug() { return process.env['RUNNER_DEBUG'] === '1' }
+  static isDebug => return process.env['RUNNER_DEBUG'] === '1'
   /**
    * Issues a debug command.
    * @param {string} message - The debug message.
