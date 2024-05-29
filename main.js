@@ -42,7 +42,7 @@ class AnnotationProperties {
   }
 }
 
-class core {
+class Core {
   /**
    * Gets the input value of the given name from the environment variables.
    * @param {string} name - The name of the input to get.
@@ -289,6 +289,8 @@ class core {
     return `${(bytes[0] | bytes[1] << 8 | bytes[2] << 16 | bytes[3] << 24).toString(16)}-${(bytes[4] | bytes[5] << 8).toString(16)}-${(bytes[6] | bytes[7] << 8).toString(16)}-${(bytes[8] | bytes[9] << 8).toString(16)}-${(bytes[10] | bytes[11] << 8 | bytes[12] << 16 | bytes[13] << 24 | bytes[14] << 32 | bytes[15] << 40).toString(16)}`
   }
 }
+
+const core = Core
 
 
 function run() {
