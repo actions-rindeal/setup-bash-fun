@@ -91,7 +91,7 @@ class Core {
    * Adds a path to the PATH environment variable.
    * @param {string} inputPath - The path to add.
    */
-  static addPath = inputPath => { issueFileCommand('PATH', inputPath) ; process.env.PATH = `${inputPath}${path.delimiter}${process.env.PATH}` }
+  static addPath(inputPath) { issueFileCommand('PATH', inputPath) ; process.env.PATH = `${inputPath}${path.delimiter}${process.env.PATH}` }
   /**
    * Checks if the runner is in debug mode.
    * @returns {boolean} Whether the runner is in debug mode.
