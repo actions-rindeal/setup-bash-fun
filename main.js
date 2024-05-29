@@ -96,7 +96,7 @@ class Core {
    * Checks if the runner is in debug mode.
    * @returns {boolean} Whether the runner is in debug mode.
    */
-  static isDebug = () => return process.env['RUNNER_DEBUG'] === '1'
+  static isDebug = () => process.env['RUNNER_DEBUG'] === '1'
   /**
    * Issues a debug command.
    * @param {string} message - The debug message.
@@ -156,7 +156,7 @@ class Core {
    * @param {string} name - name of the state to get
    * @returns {string}
    */
-  static getState = name => return process.env[`STATE_${name}`] || ''
+  static getState = name => process.env[`STATE_${name}`] || ''
   /**
    * Saves state for current action, the state can only be retrieved by this action's post job execution.
    * @param {string} name - name of the state to store
@@ -174,19 +174,19 @@ class Core {
    * @param {string} pth - Path to transform.
    * @returns {string} - Posix path.
    */
-  static toPosixPath = pth => return pth.replace(/[\\]/g, '/')
+  static toPosixPath = pth => pth.replace(/[\\]/g, '/')
   /**
    * Converts the given path to the win32 form.
    * @param {string} pth - Path to transform.
    * @returns {string} - Win32 path.
    */
-  static toWin32Path = pth => return pth.replace(/[/]/g, '\\')
+  static toWin32Path = pth => pth.replace(/[/]/g, '\\')
   /**
    * Converts the given path to a platform-specific path.
    * @param {string} pth - The path to platformize.
    * @returns {string} - The platform-specific path.
    */
-  static toPlatformPath = pth => return pth.replace(/[/\\]/g, path.sep)
+  static toPlatformPath = pth => pth.replace(/[/\\]/g, path.sep)
   /**
    * Generates a version 4 UUID, a randomly generated UUID, as per RFC 4122.
    * @returns {string} A random UUID string.
