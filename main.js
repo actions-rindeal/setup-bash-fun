@@ -1,8 +1,9 @@
-const https = require('https')
+const crypto = require('crypto')
 const fs = require('fs')
-const url = require('url')
+const https = require('https')
 const os = require('os')
 const path = require('path')
+const url = require('url')
 
 
 // Global constants
@@ -282,7 +283,6 @@ class core {
    * @returns {string} A random UUID string.
    */
   static uuidv4() {
-    import 'crypto'
     const bytes = crypto.randomBytes(16)
     bytes[6] = (bytes[6] & 0x0f) | 0x40
     bytes[8] = (bytes[8] & 0x3f) | 0x80
