@@ -48,6 +48,32 @@ class Core {
     return val.trim()
   }
   /**
+   * Gets the trimmed values of a multiline input.
+   * @param {string} name - The name of the input to get.
+   * @param {boolean} required - If true, the input is required.
+   * @returns {string[]} The trimmed input values.
+   */
+  static getMultilineInput(name, required) {
+    if (required && !getInput(name)) { throw new Error(`Input "${name}" is required.`) }
+    return getInput(name).split('\n').filter(x => x).map(input => input.trim())
+  }
+  /**
+   * Gets the boolean input value according to the YAML 1.2 "core schema" specification.
+   * Always trims the input value and converts it to lowercase for comparison.
+   * @param {string} name - The name of the input to get.
+   * @param {boolean} required - If true, the input is required.
+   * @returns {boolean} The boolean value of the input.
+   * @throws {TypeError} If input is not a valid boolean value.
+   * @throws {Error} If input is required but not provided.
+   */
+  static getBooleanInput(name, required) {
+    const val = getInput(name).trim().toLowerCase()
+    if (required && val === '') { throw new Error(`Input "${name}" is required.`) }
+    if (val === 'true') return true
+    if (val === 'false') return false
+    throw new TypeError(`Input "${name}" is not a valid boolean. Expected "true" or "false".`)
+  }
+  /**
    * Sets env variable for this action and future actions in the job
    * @param {string} name - the name of the variable to set
    * @param {Any} val - the value of the variable. Non-string values will be converted to a string via JSON.stringify
