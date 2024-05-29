@@ -58,22 +58,10 @@ class Core {
    */
   static debug(message) { this.#issueCommand('debug', {}, message) }
   /**
-   * Sets the action status to failed.
-   * @param {string | Error} message - add error issue message
+   * Writes info to log with console.log.
+   * @param {string} message - info message
    */
-  static setFailed(message) { process.exitCode = 1 ; this.error(message) }
-  /**
-   * Adds an error issue.
-   * @param {string | Error} message - error issue message. Errors will be converted to string via toString()
-   * @param {AnnotationProperties} properties - optional properties to add to the annotation.
-   */
-  static error(message, properties = {}) { this.#issueCommand('error', new AnnotationProperties(properties), message instanceof Error ? message.toString() : message) }
-  /**
-   * Adds a warning issue.
-   * @param {string | Error} message - warning issue message. Errors will be converted to string via toString()
-   * @param {AnnotationProperties} properties - optional properties to add to the annotation.
-   */
-  static warning(message, properties = {}) { this.#issueCommand('warning', new AnnotationProperties(properties), message instanceof Error ? message.toString() : message) }
+  static info(message) { process.stdout.write(message + os.EOL) }
   /**
    * Adds a notice issue.
    * @param {string | Error} message - notice issue message. Errors will be converted to string via toString()
@@ -81,19 +69,27 @@ class Core {
    */
   static notice(message, properties = {}) { this.#issueCommand('notice', new AnnotationProperties(properties), message instanceof Error ? message.toString() : message) }
   /**
-   * Writes info to log with console.log.
-   * @param {string} message - info message
+   * Adds a warning issue.
+   * @param {string | Error} message - warning issue message. Errors will be converted to string via toString()
+   * @param {AnnotationProperties} properties - optional properties to add to the annotation.
    */
-  static info(message) { process.stdout.write(message + os.EOL) }
+  static warning(message, properties = {}) { this.#issueCommand('warning', new AnnotationProperties(properties), message instanceof Error ? message.toString() : message) }
+  /**
+   * Adds an error issue.
+   * @param {string | Error} message - error issue message. Errors will be converted to string via toString()
+   * @param {AnnotationProperties} properties - optional properties to add to the annotation.
+   */
+  static error(message, properties = {}) { this.#issueCommand('error', new AnnotationProperties(properties), message instanceof Error ? message.toString() : message) }
+  /**
+   * Sets the action status to failed.
+   * @param {string | Error} message - add error issue message
+   */
+  static setFailed(message) { process.exitCode = 1 ; this.error(message) }
   /**
    * Begins an output group.
    * @param {string} name - The name of the output group
    */
   static startGroup(name) { this.#issueCommand('group', {}, name) }
-  /**
-   * Ends an output group.
-   */
-  static endGroup() { this.#issueCommand('endgroup', {}) }
   /**
    * Wrap an asynchronous function call in a group.
    * @param {string} name - The name of the group
@@ -101,6 +97,10 @@ class Core {
    * @returns {Promise<T>}
    */
   static async group(name, fn) { this.startGroup(name) ; try { return await fn() } finally { this.endGroup() } }
+  /**
+   * Ends an output group.
+   */
+  static endGroup() { this.#issueCommand('endgroup', {}) }
   /**
    * Enables or disables the echoing of commands into stdout for the rest of the step.
    * @param {boolean} enabled
@@ -112,6 +112,18 @@ class Core {
    * @returns {string}
    */
   static getState(name) { return process.env[`STATE_${name}`] || '' }
+  /**
+   * Saves state for current action, the state can only be retrieved by this action's post job execution.
+   * @param {string} name - name of the state to store
+   * @param {any} value - value to store. Non-string values will be converted to a string via JSON.stringify
+   */
+  static saveState(name, value) { this.#issueFileCommand('STATE', this.#prepareKeyValueMessage(name, value)) }
+  /**
+   * Sets the name of the output to set.
+   * @param {string} name - name of the output to set
+   * @param {any} value - value to store. Non-string values will be converted to a string via JSON.stringify
+   */
+  static setOutput(name, value) { this.#issueFileCommand('OUTPUT', this.#prepareKeyValueMessage(name, value)) }
   /**
    * Converts the given path to the posix form.
    * @param {string} pth - Path to transform.
@@ -131,38 +143,6 @@ class Core {
    */
   static toPlatformPath(pth) { return pth.replace(/[/\\]/g, path.sep) }
   /**
-   * Issues a command.
-   * @param {string} cmd - The command to issue.
-   * @param {Object} props - The properties of the command.
-   * @param {string} msg - The message of the command.
-   */
-  static #issueCommand(cmd, props, msg) { process.stdout.write(`::${cmd} ${Object.entries(props).map(([k, v]) => `${k}=${this.#escapeProperty(v)}`).join(',')}\n${this.#escapeData(msg)}` + os.EOL) }
-  static #escapeData(s) { return s.replace(/%/g, '%25').replace(/\r/g, '%0D').replace(/\n/g, '%0A') }
-  static #escapeProperty(s) { return s.replace(/%/g, '%25').replace(/\r/g, '%0D').replace(/\n/g, '%0A').replace(/:/g, '%3A').replace(/,/g, '%2C') }
-  static #toCommandValue(input) { return input == null ? '' : (typeof input === 'string' || input instanceof String) ? input : JSON.stringify(input) }
-  /**
-   * Sets the name of the output to set.
-   * @param {string} name - name of the output to set
-   * @param {any} value - value to store. Non-string values will be converted to a string via JSON.stringify
-   */
-  static setOutput(name, value) { this.#issueFileCommand('OUTPUT', this.#prepareKeyValueMessage(name, value)) }
-  /**
-   * Saves state for current action, the state can only be retrieved by this action's post job execution.
-   * @param {string} name - name of the state to store
-   * @param {any} value - value to store. Non-string values will be converted to a string via JSON.stringify
-   */
-  static saveState(name, value) { this.#issueFileCommand('STATE', this.#prepareKeyValueMessage(name, value)) }
-  static #issueFileCommand(command, message) {
-    const filePath = process.env[`GITHUB_${command}`]
-    if (!filePath) { throw new Error(`Unable to find environment variable for file command ${command}`) }
-    if (!fs.existsSync(filePath)) { throw new Error(`Missing file at path: ${filePath}`) }
-    fs.appendFileSync(filePath, `${this.#toCommandValue(message)}${os.EOL}`, { encoding: 'utf8' })
-  }
-  static #prepareKeyValueMessage(key, value) {
-    const delimiter = `ghadelimiter_${this.uuidv4()}`
-    return `${key}<<${delimiter}${os.EOL}${this.#toCommandValue(value)}${os.EOL}${delimiter}`
-  }
-  /**
    * Generates a version 4 UUID, a randomly generated UUID, as per RFC 4122.
    * @returns {string} A random UUID string.
    */
@@ -176,6 +156,20 @@ class Core {
     const p4 = (bytes[8] | bytes[9] << 8).toString(16)
     const p5 = (bytes[10] | bytes[11] << 8 | bytes[12] << 16 | bytes[13] << 24 | bytes[14] << 32 | bytes[15] << 40).toString(16)
     return `${p1}-${p2}-${p3}-${p4}-${p5}`
+  }
+  static #issueCommand(cmd, props, msg) { process.stdout.write(`::${cmd} ${Object.entries(props).map(([k, v]) => `${k}=${this.#escapeProperty(v)}`).join(',')}\n${this.#escapeData(msg)}` + os.EOL) }
+  static #escapeData(s) { return s.replace(/%/g, '%25').replace(/\r/g, '%0D').replace(/\n/g, '%0A') }
+  static #escapeProperty(s) { return s.replace(/%/g, '%25').replace(/\r/g, '%0D').replace(/\n/g, '%0A').replace(/:/g, '%3A').replace(/,/g, '%2C') }
+  static #toCommandValue(input) { return input == null ? '' : (typeof input === 'string' || input instanceof String) ? input : JSON.stringify(input) }
+  static #issueFileCommand(command, message) {
+    const filePath = process.env[`GITHUB_${command}`]
+    if (!filePath) { throw new Error(`Unable to find environment variable for file command ${command}`) }
+    if (!fs.existsSync(filePath)) { throw new Error(`Missing file at path: ${filePath}`) }
+    fs.appendFileSync(filePath, `${this.#toCommandValue(message)}${os.EOL}`, { encoding: 'utf8' })
+  }
+  static #prepareKeyValueMessage(key, value) {
+    const delimiter = `ghadelimiter_${this.uuidv4()}`
+    return `${key}<<${delimiter}${os.EOL}${this.#toCommandValue(value)}${os.EOL}${delimiter}`
   }
 }
 
