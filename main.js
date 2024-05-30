@@ -202,7 +202,20 @@ class Core {
     const p5 = (bytes[10] | bytes[11] << 8 | bytes[12] << 16 | bytes[13] << 24 | bytes[14] << 32 | bytes[15] << 40).toString(16)
     return `${p1}-${p2}-${p3}-${p4}-${p5}`
   }
-  static #issueCommand(cmd, props, msg) { process.stdout.write(`::${cmd} ${Object.entries(props).map(([k, v]) => `${k}=${this.#escapeProperty(v)}`).join(',')}${this.#escapeData(msg)}` + os.EOL) }
+  static #issueCommand(command, properties, message) {
+    command = command || 'missing.command'
+    properties = properties || {}
+    message = message || ''
+    let cmdStr = '::' + command
+    if (Object.keys(properties).length > 0) {
+      cmdStr += ' ' + Object.entries(properties)
+        .filter(([key, val]) => val)
+        .map(([key, val]) => `${key}=${escapeProperty(val)}`)
+        .join(',')
+    }
+    cmdStr += `::${escapeData(message)}`
+    process.stdout.write(cmdStr + os.EOL)
+  }
   static #escapeData(s) { return s.replace(/%/g, '%25').replace(/\r/g, '%0D').replace(/\n/g, '%0A') }
   static #escapeProperty(s) { return s.replace(/%/g, '%25').replace(/\r/g, '%0D').replace(/\n/g, '%0A').replace(/:/g, '%3A').replace(/,/g, '%2C') }
   static #toCommandValue(input) { return input == null ? '' : (typeof input === 'string' || input instanceof String) ? input : JSON.stringify(input) }
