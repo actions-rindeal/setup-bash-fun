@@ -205,9 +205,9 @@ class Core {
   static #issueCommand(command = 'missing.command', properties = {}, message = '') {
     const propStr = Object.entries(properties)
       .filter(([key, val]) => val)
-      .map(([key, val]) => `${key}=${escapeProperty(val)}`)
+      .map(([key, val]) => `${key}=${this.#escapeProperty(val)}`)
       .join(',')
-    const cmdStr = `::${command} ${propStr}::${escapeData(message)}`
+    const cmdStr = `::${command} ${propStr}::${this.#escapeData(message)}`
     process.stdout.write(cmdStr + os.EOL)
   }
   static #escapeData(s) { return s.replace(/%/g, '%25').replace(/\r/g, '%0D').replace(/\n/g, '%0A') }
