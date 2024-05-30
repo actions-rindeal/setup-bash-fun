@@ -210,10 +210,10 @@ class Core {
     if (Object.keys(properties).length > 0) {
       cmdStr += ' ' + Object.entries(properties)
         .filter(([key, val]) => val)
-        .map(([key, val]) => `${key}=${escapeProperty(val)}`)
+        .map(([key, val]) => `${key}=${this.#escapeProperty(val)}`)
         .join(',')
     }
-    cmdStr += `::${escapeData(message)}`
+    cmdStr += `::${this.#escapeData(message)}`
     process.stdout.write(cmdStr + os.EOL)
   }
   static #escapeData(s) { return s.replace(/%/g, '%25').replace(/\r/g, '%0D').replace(/\n/g, '%0A') }
