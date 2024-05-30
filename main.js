@@ -202,18 +202,12 @@ class Core {
     const p5 = (bytes[10] | bytes[11] << 8 | bytes[12] << 16 | bytes[13] << 24 | bytes[14] << 32 | bytes[15] << 40).toString(16)
     return `${p1}-${p2}-${p3}-${p4}-${p5}`
   }
-  static #issueCommand(command, properties, message) {
-    command = command || 'missing.command'
-    properties = properties || {}
-    message = message || ''
-    let cmdStr = '::' + command
-    if (Object.keys(properties).length > 0) {
-      cmdStr += ' ' + Object.entries(properties)
-        .filter(([key, val]) => val)
-        .map(([key, val]) => `${key}=${this.#escapeProperty(val)}`)
-        .join(',')
-    }
-    cmdStr += `::${this.#escapeData(message)}`
+  static #issueCommand(command = 'missing.command', properties = {}, message = '') {
+    const propStr = Object.entries(properties)
+      .filter(([key, val]) => val)
+      .map(([key, val]) => `${key}=${escapeProperty(val)}`)
+      .join(',')
+    const cmdStr = `::${command} ${propStr}::${escapeData(message)}`
     process.stdout.write(cmdStr + os.EOL)
   }
   static #escapeData(s) { return s.replace(/%/g, '%25').replace(/\r/g, '%0D').replace(/\n/g, '%0A') }
