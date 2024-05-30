@@ -224,42 +224,49 @@ class Core {
 const core = Core
 
 
-function run() {
+function main() {
   try {
-    let ref = core.getInput('ref') || SRC_REF_DEFAULT
-    let dest = core.getInput('dest') || DEST_DEFAULT
+    core.debug('Starting the run function');
+    let ref = core.getInput('ref') || SRC_REF_DEFAULT;
+    core.debug(`Reference: ${ref}`);
+    let dest = core.getInput('dest') || DEST_DEFAULT;
+    core.debug(`Destination: ${dest}`);
 
     // Validate and set default values for inputs
     if (!/^[a-zA-Z0-9_.-]*$/.test(ref)) {
-      core.setFailed('Invalid ref input. It must conform to GitHub\'s git reference syntax.')
-      return
+      core.setFailed('Invalid ref input. It must conform to GitHub\'s git reference syntax.');
+      return;
     }
 
-    const downloadUrl = `https://raw.githubusercontent.com/${SRC_REPO_NAME}/${ref}/${SRC_BASH_FUN_PATH}`
+    const downloadUrl = `https://raw.githubusercontent.com/${SRC_REPO_NAME}/${ref}/${SRC_BASH_FUN_PATH}`;
+    core.debug(`Download URL: ${downloadUrl}`);
 
-    dest = path.resolve(dest.startsWith('~') ? os.homedir() + dest.slice(1) : dest)
+    dest = path.resolve(dest.startsWith('~') ? os.homedir() + dest.slice(1) : dest);
+    core.debug(`Resolved destination: ${dest}`);
 
     if (fs.existsSync(dest)) {
-      core.setFailed('Destination file already exists.')
-      return
+      core.setFailed('Destination file already exists.');
+      return;
     }
 
     // Download the file
-    const file = fs.createWriteStream(dest)
+    const file = fs.createWriteStream(dest);
     https.get(downloadUrl, function(response) {
-      response.pipe(file)
+      response.pipe(file);
       file.on('finish', function() {
         file.close(() => {
-          core.setOutput('message', `File downloaded successfully to ${dest}`)
-        })
-      })
+          core.setOutput('message', `BASH Fun! downloaded successfully to '${dest}'`);
+          core.debug('File downloaded successfully');
+        });
+      });
     }).on('error', function(err) {
-      fs.unlink(dest)
-      core.setFailed(`Failed to download file: ${err.message}`)
-    })
+      fs.unlink(dest);
+      core.setFailed(`Failed to download file: ${err.message}`);
+    });
   } catch (error) {
-    core.setFailed(error.message)
+    core.setFailed(error.message);
   }
 }
 
-run()
+
+main()
