@@ -16,7 +16,7 @@ jobs:
       run:
         shell: bash --noprofile --norc -o errexit -o pipefail -o nounset -c "source ~/fun.sh;  set +o verbose +o xtrace  ; source '{0}'"
     steps:
-      - uses: 'actions-rindeal/setup-bash-fun@master'
+      - uses: 'actions-rindeal/setup-bash-fun@master'  # IMPORTANT: must be the first step in a job
       - run: |
         # now you can already use functions from the BASH Fun library
 ```
