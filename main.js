@@ -7,7 +7,7 @@ const url = require('url')
 
 
 // Global constants
-const SRC_REPO_NAME = 'actions-rindeal/setup-bash-fun'
+const SRC_REPO_NAME = 'actions-rindeal/bash-fun'
 const SRC_REF_DEFAULT = 'master'
 const SRC_BASH_FUN_PATH = 'fun.sh'
 const DEST_DEFAULT = `~/${SRC_BASH_FUN_PATH}`
@@ -245,7 +245,7 @@ function main() {
       return;
     }
 
-    const downloadUrl = `https://raw.githubusercontent.com/${SRC_REPO_NAME}/${ref}/${SRC_BASH_FUN_PATH}`;
+    const downloadUrl = `https://github.com/${SRC_REPO_NAME}/raw/${ref}/${SRC_BASH_FUN_PATH}`;
     core.debug(`Download URL: ${downloadUrl}`);
 
     dest = path.resolve(dest.startsWith('~') ? os.homedir() + dest.slice(1) : dest);
