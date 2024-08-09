@@ -11,15 +11,14 @@ How to Run
 ```yaml
 jobs:
   test:
+    runs-on: ubuntu-latest
     defaults:
       run:
         shell: bash --noprofile --norc -o errexit -o pipefail -o nounset -c "source ~/fun.sh;  set +o verbose +o xtrace  ; source '{0}'"
-    runs-on: ubuntu-latest
-
     steps:
-    - uses: actions-rindeal/setup-bash-fun@master
-    - run: |
-      # now you can already use functions from the BASH Fun library
+      - uses: actions-rindeal/setup-bash-fun@master
+      - run: |
+        # now you can already use functions from the BASH Fun library
 ```
 
 ### Semi-manual Way
