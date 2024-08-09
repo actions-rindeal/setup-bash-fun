@@ -44,7 +44,7 @@ jobs:
 Download the library yourself:
 
 ```sh
-wget -O ~/fun.sh https://github.com/actions-rindeal/setup-bash-fun/raw/master/fun.sh
+wget -O ~/fun.sh https://github.com/actions-rindeal/bash-fun/raw/master/fun.sh
 ```
 
 And use it however you want
@@ -61,7 +61,7 @@ jobs:
         # -o verbose -o xtrace
         shell: bash --noprofile --norc -o errexit -o pipefail -o nounset {0}
     steps:
-      - run: wget -O ~/fun.sh https://github.com/actions-rindeal/setup-bash-fun/raw/master/fun.sh
+      - run: wget -O ~/fun.sh https://github.com/actions-rindeal/bash-fun/raw/master/fun.sh
       - run: |
         source ~/fun.sh
         # have fun with BASH
