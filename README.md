@@ -44,7 +44,7 @@ jobs:
 Download the library yourself:
 
 ```sh
-wget -O ~/fun.sh https://raw.githubusercontent.com/actions-rindeal/setup-bash-fun/master/fun.sh
+wget -O ~/fun.sh https://github.com/actions-rindeal/setup-bash-fun/raw/master/fun.sh
 ```
 
 And use it however you want
@@ -65,7 +65,7 @@ jobs:
 
     steps:
     - run: |
-      wget -O ~/fun.sh https://raw.githubusercontent.com/actions-rindeal/setup-bash-fun/master/fun.sh
+      wget -O ~/fun.sh https://github.com/actions-rindeal/setup-bash-fun/raw/master/fun.sh
       source ~/fun.sh
       # have fun with BASH
 
