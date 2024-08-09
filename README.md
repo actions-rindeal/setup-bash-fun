@@ -61,8 +61,8 @@ jobs:
         # -o verbose -o xtrace
         shell: bash --noprofile --norc -o errexit -o pipefail -o nounset {0}
     steps:
+      - run: wget -O ~/fun.sh https://github.com/actions-rindeal/setup-bash-fun/raw/master/fun.sh
       - run: |
-        wget -O ~/fun.sh https://github.com/actions-rindeal/setup-bash-fun/raw/master/fun.sh
         source ~/fun.sh
         # have fun with BASH
   
