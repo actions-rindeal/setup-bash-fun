@@ -13,8 +13,7 @@ jobs:
   test:
     defaults:
       run:
-        # -o verbose -o xtrace
-        shell: bash --noprofile --norc -o errexit -o pipefail -o nounset -c "source ~/fun.sh;  set -o verbose -o xtrace  ; source '{0}'"
+        shell: bash --noprofile --norc -o errexit -o pipefail -o nounset -c "source ~/fun.sh;  set +o verbose +o xtrace  ; source '{0}'"
     runs-on: ubuntu-latest
 
     steps:
