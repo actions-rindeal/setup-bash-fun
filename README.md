@@ -26,18 +26,17 @@ jobs:
 ```yaml
 jobs:
   test:
+    runs-on: ubuntu-latest
     defaults:
       run:
         # -o verbose -o xtrace
         shell: bash --noprofile --norc -o errexit -o pipefail -o nounset {0}
-    runs-on: ubuntu-latest
-
     steps:
-    - uses: actions-rindeal/setup-bash-fun@master
-    - run: |
-      # source on demand only
-      source ~/fun.sh
-      # ...
+      - uses: actions-rindeal/setup-bash-fun@master
+      - run: |
+        # source on demand only
+        source ~/fun.sh
+        # ...
 ```
 
 ### Manual Way
