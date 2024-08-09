@@ -1,8 +1,6 @@
 #!/bin/bash
 
 ## Usage:
-##     set-failed "No 'repo' input provided."
-##     set-failed "Invalid 'repo' input." "Check 'repo' format: '%s'" "${REPO}"
-set-failed() { printf "::error title=$1::${2-$1}\n" "${@:2}" ; exit 123 ; }
-
-core:setFailed() { set-failed "${@}" ; }
+##     setFailedAndExit  "No 'repo' input provided."
+##     setFailedAndExit  "Invalid 'repo' input."  "Check 'repo' format: '%s'" "${REPO}"
+core:setFailedAndExit() { printf "::error title=$1::${2-$1}\n" "${@:3}" ; exit 1 ; }
