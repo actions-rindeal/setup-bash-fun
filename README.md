@@ -29,8 +29,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        # -o verbose -o xtrace
-        shell: bash --noprofile --norc -o errexit -o pipefail -o nounset {0}
+        shell: bash --noprofile --norc -o errexit -o pipefail -o nounset +o verbose +o xtrace {0}
     steps:
       - uses: 'actions-rindeal/setup-bash-fun@master'
       - run: |
@@ -56,10 +55,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        # -o noclobber: prevent existing regular files from being overwritten by redirection of output
-        # -o noexec: This option will not execute commands; it’s useful for checking a script for syntax errors.
-        # -o verbose -o xtrace
-        shell: bash --noprofile --norc -o errexit -o pipefail -o nounset {0}
+        shell: bash --noprofile --norc -o errexit -o pipefail -o nounset +o verbose +o xtrace {0}
     steps:
       - run: wget -O ~/fun.sh https://github.com/actions-rindeal/bash-fun/raw/master/fun.sh
       - run: |
