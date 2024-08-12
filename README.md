@@ -14,7 +14,10 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        shell: bash --noprofile --norc -o errexit -o pipefail -o nounset -c "source ~/fun.sh;  set +o verbose +o xtrace  ; source '{0}'"
+        shell: >
+          bash --noprofile --norc
+          -o errexit -o pipefail -o nounset
+          -c "source ~/fun.sh ; set +o verbose +o xtrace ; source '{0}'"
     steps:
       - uses: 'actions-rindeal/setup-bash-fun@master'  # IMPORTANT: must be specified somewhere before the first `run:`
       - run: |
